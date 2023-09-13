@@ -2,62 +2,48 @@
 
 import { useState } from 'react';
 import axios from 'axios';
+import { Button } from '@mantine/core';
 
 function AbstractFetcher() {
   const [doi, setDoi] = useState('');
-  const [abstract, setAbstract] = useState('');
+  const [abstract, setAbstract] = useState("Please enter a valid DOI.");
 
-  // https://api.openalex.org/works/W2741809807
-  // https://api.openalex.org/works/${doi}
+  type InvertedIndex = Record<string, number[]>;
 
-  // const fetchAbstract = async () => {
-  //   try {
-  //     const response = await axios.get(`https://api.openalex.org/works/${doi}`);
-  //     console.log(response)
-  //     const { abstract_inverted_index } = response.data;
+  function convertToString(invertedIndex: InvertedIndex): string {
+    const results = Object.keys(invertedIndex);//store all key in an array
+    // Initialize an empty array to store the reconstructed paragraph
+    const paragraphArray: string[] = [];
 
-  //     // Implement the decompression logic for abstract_inverted_index if needed
-  //     setAbstract(abstract_inverted_index);
-  //   } catch (error) {
-  //     console.error('Error fetching abstract:', error);
-  //   }
-  // };
+    // Iterate through the inverted index entries
+    for (const w in invertedIndex) {
+      if (invertedIndex.hasOwnProperty(w)) { //if it has word property
+        const positions = invertedIndex[w]; //get the positions array
+        for (const position of positions) {
+           //set the string in a position to that word
+           paragraphArray[position] = w;
+        }
+      }
+    }
 
-
-
-  // const fetchAbstract = async () => {
-  //   try {
-  //     const response = await axios.get(`https://api.openalex.org/works/${doi}`);
-  //     console.log(response);
-  //     const { abstract_inverted_index } = response.data;
-  
-  //     if (typeof abstract_inverted_index === 'string') {
-  //       // Implement the decompression logic for abstract_inverted_index if needed
-  //       setAbstract(abstract_inverted_index);
-  //     } else {
-  //       console.error('Invalid abstract data:', abstract_inverted_index);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching abstract:', error);
-  //   }
-  // };
-
+    // join string in array to paragraph
+    const paragraph: string = paragraphArray.join(" ");
+    return paragraph;
+  }
 
 
   const fetchAbstract = async () => {
     try {
-      const response = await axios.get(`https://api.openalex.org/works/${doi}`);
+      const response = await axios.get(`https://api.openalex.org/works/https://doi.org/${doi}`);
       console.log(response);
       const { abstract_inverted_index } = response.data;
-  
+
       // Check if abstract_inverted_index is an object (not a string)
       if (typeof abstract_inverted_index === 'object') {
-        // You might need to convert the object to a string here
-        // For example, using JSON.stringify()
-        const abstractString = JSON.stringify(abstract_inverted_index);
-  
-        // Implement any further processing or decompression logic as needed
-        setAbstract(abstractString);
+        //convert index to string
+        const paragraph: string = convertToString(abstract_inverted_index);
+        console.log(paragraph);
+        setAbstract(paragraph);
       } else if (typeof abstract_inverted_index === 'string') {
         // If it's already a string, set it directly
         setAbstract(abstract_inverted_index);
@@ -68,22 +54,31 @@ function AbstractFetcher() {
       console.error('Error fetching abstract:', error);
     }
   };
-  
-  
+
+
 
 
   return (
-    <div>
+    <div style={{ textAlign: 'center' }}>
       <input
         type="text"
         placeholder="Enter DOI"
         value={doi}
         onChange={(e) => setDoi(e.target.value)}
       />
-      <button onClick={fetchAbstract}>Get Abstract</button>
-      <p>{abstract}</p >
+      <Button onClick={fetchAbstract}>Get Abstract</Button>
+      <p style={{ backgroundColor: 'lightgray' }}>{abstract}</p >
     </div>
   );
+
+
+
 }
 
 export default AbstractFetcher;
+
+
+
+
+
+

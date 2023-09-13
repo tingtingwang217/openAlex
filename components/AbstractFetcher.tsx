@@ -26,7 +26,7 @@ function AbstractFetcher() {
       }
     }
 
-    // join string in array to paragraph
+    // join string in array paragraph
     const paragraph: string = paragraphArray.join(" ");
     return paragraph;
   }
@@ -44,17 +44,15 @@ function AbstractFetcher() {
         const paragraph: string = convertToString(abstract_inverted_index);
         console.log(paragraph);
         setAbstract(paragraph);
-      } else if (typeof abstract_inverted_index === 'string') {
-        // If it's already a string, set it directly
-        setAbstract(abstract_inverted_index);
       } else {
+        setAbstract("Please enter a valid DOI.");
         console.error('Invalid abstract data:', abstract_inverted_index);
       }
     } catch (error) {
+      setAbstract("Please enter a valid DOI.");
       console.error('Error fetching abstract:', error);
     }
   };
-
 
 
 
